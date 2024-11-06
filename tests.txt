@@ -1,0 +1,19 @@
+Enter the supply coefficients (space-separated): 20 30 25
+Enter the number of demand locations: 3
+Enter the cost matrix row by row:
+Enter costs for supply 1 (space-separated): 8 6 10
+Enter costs for supply 2 (space-separated): 9 5 6
+Enter costs for supply 3 (space-separated): 10 7 5
+Enter the demand coefficients (space-separated): 30 25 20
+
+Input Parameter Table:
+Supply\Demand  30        25        20        
+Supply 1       8         6         10        
+Supply 2       9         5         6         
+Supply 3       10        7         5         
+
+Initial Basic Feasible Solution (IBFS) using North-West Corner Method:
+[20, 0, 0]
+[10, 15, 0]
+[0, 10, 20]
+Total transportation cost: 510

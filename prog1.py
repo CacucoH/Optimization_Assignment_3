@@ -1,10 +1,7 @@
-import numpy as np
-
-# Function to implement the North-West Corner Method
-def north_west_corner_method(supply, demand):
+def nw_method(supply, demand):
     # Initialize the solution matrix with zeros
     m, n = len(supply), len(demand)
-    solution = np.zeros((m, n))
+    solution = [[0] * n for _ in range(m)]  # Create a 2D matrix of zeros
 
     # Set up pointers for supply and demand
     i, j = 0, 0
@@ -28,11 +25,26 @@ def north_west_corner_method(supply, demand):
 
     return solution
 
-# Function to print the transportation table
-def print_solution(solution):
-    print("Initial Basic Feasible Solution (IBFS) using North-West Corner Method:")
-    for row in solution:
-        print(row)
+# Function to print the transportation table (showing the cost matrix with supply and demand)
+def print_input_table(supply, cost_matrix, demand):
+    print("\nInput Parameter Table:")
+    print(f"{'Supply\\Demand':<15}", end="")
+    for d in demand:
+        print(f"{d:<10}", end="")
+    print()
+    
+    for i, row in enumerate(cost_matrix):
+        print(f"Supply {i + 1:<5}", end="")
+        for j, cost in enumerate(row):
+            print(f"{cost:<10}", end="")
+        print()
+
+# Function to check if the problem is balanced
+def check_balance(supply, demand):
+    if sum(supply) != sum(demand):
+        print("The problem is not balanced!")
+        return False
+    return True
 
 # Function to take input from the user (or pre-define it for testing)
 def get_input():
@@ -57,15 +69,24 @@ def get_input():
 def main():
     # Get inputs from user or define them for testing
     supply, cost_matrix, demand = get_input()
+
+    # Check if the problem is balanced
+    if not check_balance(supply, demand):
+        return
+    
+    # Print the input parameter table
+    print_input_table(supply, cost_matrix, demand)
     
     # Call the North-West Corner Method to get the solution
-    solution = north_west_corner_method(supply, demand)
+    solution = nw_method(supply[:], demand[:])  # Pass copies to avoid modification in the original lists
     
     # Print the solution matrix
-    print_solution(solution)
+    print("\nInitial Basic Feasible Solution (IBFS) using North-West Corner Method:")
+    for row in solution:
+        print(row)
     
     # Optionally: You can print the cost of the solution if required
-    total_cost = np.sum(np.multiply(solution, cost_matrix))  # Element-wise multiplication of cost and allocation
+    total_cost = sum(solution[i][j] * cost_matrix[i][j] for i in range(len(supply)) for j in range(len(demand)))
     print(f"Total transportation cost: {total_cost}")
 
 # Run the main function
