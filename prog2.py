@@ -1,4 +1,34 @@
-import numpy as np
+# Function to print the input parameter table (Cost Matrix C, Supply S, Demand D)
+def print_input_table(costs, supply, demand):
+    m, n = len(supply), len(demand)
+    print("\nInput Parameter Table:")
+    print("------------------------------------------------------")
+    # Print the header for the cost matrix
+    print("Supply \\ Demand", end=" | ")
+    for j in range(n):
+        print(f"Store {j + 1}", end=" | ")
+    print("Supply")
+    print("")
+
+    # Print the cost matrix and supply values
+    for i in range(m):
+        print(f"Warehouse {(i + 1):<5}", end=" | ")
+        for j in range(n):
+            print(f"{costs[i][j]:<6}", end=" | ")
+        print(f"{supply[i]}")
+
+    # Print the demand values
+    print("------------------------------------------------------")
+    print(f"Demand: {', '.join(map(str, demand))}")
+    print("------------------------------------------------------")
+
+# Function to check if the problem is balanced
+def is_balanced(supply, demand):
+    total_supply = sum(supply)
+    total_demand = sum(demand)
+    if total_supply != total_demand:
+        return False  # Problem is not balanced
+    return True
 
 # Function to calculate penalties for rows and columns
 def calculate_penalties(costs, supply, demand):
@@ -32,9 +62,9 @@ def calculate_penalties(costs, supply, demand):
 # Function to implement Vogel's Approximation Method
 def vogels_approximation_method(supply, demand, costs):
     m, n = len(supply), len(demand)
-    solution = np.zeros((m, n))
+    solution = [[0] * n for _ in range(m)]  # Initialize solution matrix
 
-    while np.any(supply) and np.any(demand):
+    while any(supply) and any(demand):
         # Calculate penalties for rows and columns
         row_penalties, col_penalties = calculate_penalties(costs, supply, demand)
 
@@ -46,12 +76,18 @@ def vogels_approximation_method(supply, demand, costs):
             # Row with maximum penalty
             row_index = row_penalties.index(max_row_penalty)
             # Select the cell with the minimum cost in this row
-            col_index = np.argmin([costs[row_index][j] if demand[j] > 0 else float('inf') for j in range(n)])
+            col_index = min(
+                ((j, costs[row_index][j]) for j in range(n) if demand[j] > 0),
+                key=lambda x: x[1], default=(None, None)
+            )[0]
         else:
             # Column with maximum penalty
             col_index = col_penalties.index(max_col_penalty)
             # Select the cell with the minimum cost in this column
-            row_index = np.argmin([costs[i][col_index] if supply[i] > 0 else float('inf') for i in range(m)])
+            row_index = min(
+                ((i, costs[i][col_index]) for i in range(m) if supply[i] > 0),
+                key=lambda x: x[1], default=(None, None)
+            )[0]
 
         # Allocate as much as possible to the selected cell
         allocation = min(supply[row_index], demand[col_index])
@@ -73,22 +109,38 @@ def vogels_approximation_method(supply, demand, costs):
 
 # Function to print the transportation table
 def print_solution(solution):
-    print("Initial Basic Feasible Solution (IBFS) using Vogel’s Approximation Method:")
+    print("\IBFS using Vogel’s Approximation Method:")
     for row in solution:
         print(row)
 
-# Input for supply, demand, and cost matrix
-supply = [7, 9, 8]  # Example supply values
-demand = [5, 4, 6, 9]  # Example demand values
-costs = [
-    [8, 6, 10, 9],  # Cost matrix
-    [9, 7, 4, 2],
-    [3, 6, 8, 7]
-]
+# Main function to process input and apply the algorithm
+def main():
+    # Get the supply vector from the user (space-separated)
+    supply = list(map(int, input("Enter the supply values (space-separated): ").split()))
 
-# Call the Vogel's Approximation Method to get the solution
-solution = vogels_approximation_method(supply, demand, costs)
+    # Get the cost matrix from the user (space-separated rows)
+    costs = []
+    for i in range(len(supply)):
+        row = list(map(int, input(f"Enter the costs for supply row {i + 1}: ").split()))
+        costs.append(row)
 
-# Print the solution matrix
-print_solution(solution)
+    # Get the demand vector from the user (space-separated)
+    demand = list(map(int, input("Enter the demand values (space-separated): ").split()))
 
+    # Check if the problem is balanced
+    if not is_balanced(supply, demand):
+        print("The problem is not balanced!")
+        return
+    
+    # Print the input table
+    print_input_table(costs, supply, demand)
+    
+    # Call the Vogel's Approximation Method to get the solution
+    solution = vogels_approximation_method(supply, demand, costs)
+    
+    # Print the solution matrix
+    print_solution(solution)
+
+# Execute the main function
+if __name__ == "__main__":
+    main()

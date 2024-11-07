@@ -1,80 +1,89 @@
-import numpy as np
-
-# Function to calculate the opportunity cost for each unfilled cell
-def calculate_opportunity_cost(costs, supply, demand):
-    m, n = len(costs), len(costs[0])
-    opportunity_cost = np.zeros((m, n))
-
-    # Calculate opportunity cost for each row and column
-    for i in range(m):
-        if supply[i] > 0:
-            row_min = min([costs[i][j] for j in range(n) if demand[j] > 0])
-            for j in range(n):
-                if demand[j] > 0:
-                    opportunity_cost[i][j] = costs[i][j] - row_min
-
-    for j in range(n):
-        if demand[j] > 0:
-            col_min = min([costs[i][j] for i in range(m) if supply[i] > 0])
-            for i in range(m):
-                if supply[i] > 0:
-                    opportunity_cost[i][j] = costs[i][j] - col_min
-
-    return opportunity_cost
-
-# Function to implement Russell's Approximation Method
-def russells_approximation_method(supply, demand, costs):
-    m, n = len(supply), len(demand)
-    solution = np.zeros((m, n))
-
-    while np.any(supply) and np.any(demand):
-        # Calculate opportunity costs
-        opportunity_cost = calculate_opportunity_cost(costs, supply, demand)
-
-        # Find the cell with the highest opportunity cost
-        max_cost = np.max(opportunity_cost)
-        if max_cost == 0:  # If no opportunity cost is calculated, break out
-            break
-
-        # Get the position of the cell with the highest opportunity cost
-        row_index, col_index = np.unravel_index(np.argmax(opportunity_cost), opportunity_cost.shape)
-
-        # Allocate as much as possible to the selected cell
-        allocation = min(supply[row_index], demand[col_index])
-        solution[row_index][col_index] = allocation
-
-        # Update supply and demand
-        supply[row_index] -= allocation
-        demand[col_index] -= allocation
-
-        # If supply is exhausted, remove this row
-        if supply[row_index] == 0:
-            opportunity_cost[row_index, :] = -1  # Ignore this row in next iterations
-
-        # If demand is satisfied, remove this column
-        if demand[col_index] == 0:
-            opportunity_cost[:, col_index] = -1  # Ignore this column in next iterations
-
-    return solution
-
-# Function to print the transportation table
-def print_solution(solution):
-    print("Initial Basic Feasible Solution (IBFS) using Russell's Approximation Method:")
-    for row in solution:
+def russells_method_solver(S, C, D):
+    # Step 1: Check if the input is valid
+    if not S or not D or not C or len(S) != len(C) or any(len(row) != len(D) for row in C):
+        return "The method is not applicable!"
+    
+    # Step 2: Check if the problem is balanced
+    if sum(S) != sum(D):
+        return "The problem is not balanced!"
+    
+    # Step 3: Print the input parameter table (cost matrix with supply and demand)
+    print("Input parameter table:")
+    
+    # Print the column headers (Demand values)
+    demand_header = "        " + "  ".join([f"Demand {i+1}" for i in range(len(D))])
+    print(demand_header)
+    
+    # Print the cost matrix with supply values at the end of each row
+    for i in range(len(S)):
+        row = "Supply " + str(i+1) + " " + "  ".join(map(str, C[i])) + "  " + str(S[i])
         print(row)
+    
+    # Print the total demand row
+    total_demand = "Demand " + "  ".join(map(str, D)) + "  "
+    print(total_demand)
+    
+    # Step 4: Apply the Least Cost Method (Russell's Method) to find the initial solution
+    # Create a solution matrix to store the transport plan
+    transport_plan = [[0 for _ in range(len(D))] for _ in range(len(S))]
+    
+    # Copy of supply and demand for manipulation
+    supply = S[:]
+    demand = D[:]
+    
+    # Step 5: Track exhausted supply and demand
+    exhausted_supply = [False] * len(S)
+    exhausted_demand = [False] * len(D)
+    
+    # Step 6: Apply Least Cost Method
+    while any(s > 0 for s in supply) and any(d > 0 for d in demand):
+        # Find the cell with the minimum cost in the cost matrix that is still valid
+        min_cost = float('inf')
+        min_row, min_col = -1, -1
+        for i in range(len(S)):
+            if exhausted_supply[i]:
+                continue
+            for j in range(len(D)):
+                if exhausted_demand[j]:
+                    continue
+                if supply[i] > 0 and demand[j] > 0 and C[i][j] < min_cost:
+                    min_cost = C[i][j]
+                    min_row, min_col = i, j
+        
+        # Allocate the supply to the selected cell
+        allocated = min(supply[min_row], demand[min_col])
+        transport_plan[min_row][min_col] = allocated
+        supply[min_row] -= allocated
+        demand[min_col] -= allocated
+        
+        # If supply for a row is exhausted, mark the row as exhausted
+        if supply[min_row] == 0:
+            exhausted_supply[min_row] = True
+        
+        # If demand for a column is fulfilled, mark the column as exhausted
+        if demand[min_col] == 0:
+            exhausted_demand[min_col] = True
 
-# Input for supply, demand, and cost matrix
-supply = [7, 9, 8]  # Example supply values
-demand = [5, 4, 6, 9]  # Example demand values
-costs = [
-    [8, 6, 10, 9],  # Cost matrix
-    [9, 7, 4, 2],
-    [3, 6, 8, 7]
-]
+    # Step 7: Print the solution (transportation plan)
+    print("\nTransportation plan (solution):")
+    total_cost = 0
+    for i in range(len(S)):
+        for j in range(len(D)):
+            if transport_plan[i][j] > 0:
+                print(f"From Supply {i+1} to Demand {j+1}: {transport_plan[i][j]} units")
+                total_cost += transport_plan[i][j] * C[i][j]
+    
+    # Print the total transportation cost
+    print(f"\nTotal transportation cost: {total_cost}")
+    
+    return "Solution printed successfully!"
 
-# Call the Russell's Approximation Method to get the solution
-solution = russells_approximation_method(supply, demand, costs)
+# Example usage
+S = [10, 20, 30]  # Supply vector
+C = [[3, 2, 4],    # Cost matrix
+     [2, 5, 3],
+     [6, 4, 7]]
+D = [15, 25, 20]   # Demand vector
 
-# Print the solution matrix
-print_solution(solution)
-
+result = russells_method_solver(S, C, D)
+print(result)
