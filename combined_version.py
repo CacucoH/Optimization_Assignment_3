@@ -1,10 +1,12 @@
 class BalancedProlemSolver:
     def __init__(self, supply: list[int], demand: list[int], cost: list[list[int]]):
+        self.balanced = True 
         self.supply = supply
         self.demand = demand
         self.costs = cost
 
-        self.print_input_table()
+        if not self.is_balanced():
+            self.balanced = False
 
     # Function to calculate penalties for rows and columns (used in Vogel's Approximation Method)
     def calculate_penalties(self):
@@ -40,6 +42,10 @@ class BalancedProlemSolver:
         """
         Implements the North-West Corner Method to allocate the minimum self.supply to self.demand.
         """
+        if not self.balanced:
+            print("Problem is not balanced!")
+            exit(0)
+
         m, n = len(self.supply), len(self.demand)
         solution = [[0] * n for _ in range(m)]  # Initialize matrix
 
@@ -64,6 +70,10 @@ class BalancedProlemSolver:
 
     # Vogel's Approximation Method
     def vogels_approximation_method(self):
+        if not self.balanced:
+            print("Problem is not balanced!")
+            exit(0)
+
         m, n = len(self.supply), len(self.demand)
         solution = [[0] * n for _ in range(m)]  # Initialize solution matrix
 
@@ -111,6 +121,10 @@ class BalancedProlemSolver:
         return solution
 
     def russells_approximation_method(self):
+        if not self.balanced:
+            print("Problem is not balanced!")
+            exit(0)
+
         m, n = len(self.supply), len(self.demand)
         solution = [[0] * n for _ in range(m)]  # Initialize solution matrix
 
@@ -156,22 +170,22 @@ class BalancedProlemSolver:
         print("\nInput Parameter Table:")
         print("------------------------------------------------------")
         # Print the header for the cost matrix
-        print("supply \\ demand", end=" | ")
+        print("sup \\ dem", end=" | ")
         for j in range(n):
-            print(f"Store {j + 1}", end=" | ")
+            print(f"Dest {j + 1}", end=" | ")
         print("supply")
         print("")
 
         # Print the cost matrix and self.supply values
         for i in range(m):
-            print(f"Warehouse {(i + 1):<5}", end=" | ")
+            print(f"  Src {(i + 1):<3}", end=" | ")
             for j in range(n):
-                print(f"{self.costs[i][j]:<7}", end=" | ")
+                print(f"{self.costs[i][j]:<6}", end=" | ")
             print(f"{self.supply[i]}")
 
-        # Print the self.demand values
+        # Print the demand values
         print("------------------------------------------------------")
-        print(f"demand: {', '.join(map(str, self.demand))}")
+        print(f"Demand: {', '.join(map(str, self.demand))}")
         print("------------------------------------------------------")
 
     # Function to check if the problem is balanced
@@ -194,13 +208,14 @@ def print_solution(solution):
 def get_input():
     """Gets input for self.supply, self.demand, and cost matrix."""
     supply = list(map(int, input("Enter the supply values (space-separated): ").split()))
-    demand = list(map(int, input("Enter the demand values (space-separated): ").split()))
-    
+
     cost_matrix = []
     print(f"Enter the cost matrix ({len(supply)} rows, {len(demand)} columns):")
     for i in range(len(supply)):
         row = list(map(int, input(f"Enter the costs for supply point {i + 1}: ").split()))
         cost_matrix.append(row)
+    
+    demand = list(map(int, input("Enter the demand values (space-separated): ").split()))
 
     return supply, demand, cost_matrix
 
@@ -227,16 +242,34 @@ def calculate_total_cost(init_matrix, solution_matrix):
 
 def main():
     # Get the self.supply, self.demand, and cost matrix from the user
-    supply, demand, cost_matrix = get_input()
-    solver = BalancedProlemSolver(supply, demand, cost_matrix)
+    # supply, demand, cost_matrix = get_input()
+    supply = [7, 9, 18]
+    demand = [5, 8, 7, 14]
+    cost_matrix = [
+        [19, 30, 50, 10],
+        [70, 30, 40, 60],
+        [40, 8, 70, 20]
+    ]
+    solver = BalancedProlemSolver(supply.copy(), demand.copy(), cost_matrix)
+    solver.print_input_table()
 
-    # Uncomment method you want to use
+    # Solution for NW method
     solution_matrix = solver.nw_method()
-    # solution_matrix = solver.vogels_approximation_method()
-    # solution_matrix = solver.russells_approximation_method()
-
     print_solution(solution_matrix)
     total_cost = calculate_total_cost(cost_matrix, solution_matrix)
+    
+    # Solution or VOGEL's
+    solver = BalancedProlemSolver(supply.copy(), demand.copy(), cost_matrix)
+    solution_matrix = solver.vogels_approximation_method()
+    print_solution(solution_matrix)
+    total_cost = calculate_total_cost(cost_matrix, solution_matrix)
+
+    # Solution for RUSSEL'S
+    solver = BalancedProlemSolver(supply.copy(), demand.copy(), cost_matrix)
+    solution_matrix = solver.russells_approximation_method()
+    print_solution(solution_matrix)
+    total_cost = calculate_total_cost(cost_matrix, solution_matrix)
+
 
 if __name__ == "__main__":
     main()

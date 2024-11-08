@@ -1,18 +1,35 @@
-Enter the supply coefficients: 70 50
-Enter the number of demand locations: 3
-Enter the cost matrix row by row:
-Enter costs for supply 1: 4 6 8
-Enter costs for supply 2: 5 4 3
-Enter the demand coefficients: 40 60 20
+Enter the supply values (space-separated): 7 9 18
+Enter the demand values (space-separated): 5 8 7 14
+Enter the cost matrix (3 rows, 4 columns):
+Enter the costs for supply point 1: 19 30 50 10
+Enter the costs for supply point 2: 70 30 40 60
+Enter the costs for supply point 3: 40 8 70 20
 
-Initial problem:
-Supply\Demand  40        60        20        
-Supply 1       4         6         8         
-Supply 2       5         4         3         
 
-Solution:
-[40, 30, 0]
-[0, 30, 20]
+# NORTH-WEST CORNER
 
-Total cost: 
-4 * 40 + 6 * 30 + 4 * 30 + 3 * 20 = 520
+Solution Matrix:
+[5, 2, 0, 0]
+[0, 6, 3, 0]
+[0, 0, 4, 14]
+
+Total cost: 19 * 5 + 30 * 2 + 30 * 6 + 40 * 3 + 70 * 4 + 20 * 14 = 1015
+
+# VOGEL's
+
+Solution Matrix:
+[5, 0, 0, 2]
+[0, 0, 7, 2]
+[0, 8, 0, 10]
+
+Total cost: 19 * 5 + 10 * 2 + 40 * 7 + 60 * 2 + 8 * 8 + 20 * 10 = 779
+
+
+# RUSSEL's 
+
+Solution Matrix:
+[5, 2, 0, 0]
+[0, 2, 7, 0]
+[0, 4, 0, 14]
+
+Total cost: 19 * 5 + 30 * 2 + 30 * 2 + 40 * 7 + 8 * 4 + 20 * 14 = 807
