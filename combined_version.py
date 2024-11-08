@@ -8,6 +8,10 @@ class BalancedProlemSolver:
         if not self.is_balanced():
             self.balanced = False
 
+        if self.is_degenerate() or self.has_zero_or_negative_costs():
+            print("The method is not applicable!")
+            exit(0)
+
     # Function to calculate penalties for rows and columns (used in Vogel's Approximation Method)
     def calculate_penalties(self):
         row_penalties = []
@@ -37,13 +41,12 @@ class BalancedProlemSolver:
         
         return row_penalties, col_penalties
     
-    # North-West Corner Method
     def nw_method(self):
         """
         Implements the North-West Corner Method to allocate the minimum self.supply to self.demand.
         """
         if not self.balanced:
-            print("Problem is not balanced!")
+            print("The problem is not balanced!")
             exit(0)
 
         m, n = len(self.supply), len(self.demand)
@@ -68,10 +71,12 @@ class BalancedProlemSolver:
 
         return solution
 
-    # Vogel's Approximation Method
     def vogels_approximation_method(self):
+        """
+        Implements the Vogel's approximation method to allocate the minimum self.supply to self.demand.
+        """
         if not self.balanced:
-            print("Problem is not balanced!")
+            print("The problem is not balanced!")
             exit(0)
 
         m, n = len(self.supply), len(self.demand)
@@ -121,8 +126,11 @@ class BalancedProlemSolver:
         return solution
 
     def russells_approximation_method(self):
+        """
+        Implements the Russel's approximation method to allocate the minimum self.supply to self.demand.
+        """
         if not self.balanced:
-            print("Problem is not balanced!")
+            print("The problem is not balanced!")
             exit(0)
 
         m, n = len(self.supply), len(self.demand)
@@ -167,14 +175,13 @@ class BalancedProlemSolver:
     # Function to print the input parameter table (Cost Matrix C, self.supply S, self.demand D)
     def print_input_table(self):
         m, n = len(self.supply), len(self.demand)
-        print("\nInput Parameter Table:")
-        print("------------------------------------------------------")
+        print("\nInput Parameter Table:\n------------------------------------------------------")
         # Print the header for the cost matrix
-        print("sup \\ dem", end=" | ")
+        print("dem \\ sup", end=" | ")
         for j in range(n):
             print(f"Dest {j + 1}", end=" | ")
         print("supply")
-        print("")
+        print("------------------------------------------------------")
 
         # Print the cost matrix and self.supply values
         for i in range(m):
@@ -182,19 +189,42 @@ class BalancedProlemSolver:
             for j in range(n):
                 print(f"{self.costs[i][j]:<6}", end=" | ")
             print(f"{self.supply[i]}")
-
+ 
         # Print the demand values
         print("------------------------------------------------------")
-        print(f"Demand: {', '.join(map(str, self.demand))}")
-        print("------------------------------------------------------")
+        print(f"  Demand:", end=" | ")
+        for j in range(len(self.demand)):
+            print(f" {self.demand[j]:<5}", end=" | ")
+        print("\n------------------------------------------------------")
 
-    # Function to check if the problem is balanced
-    def is_balanced(self):
+    """
+        Three functions to check if problem is:
+        a) Balanced
+        b) Matrices and vectors has no negaitves
+        c) There is no degeneracy
+    """
+    def is_balanced(self) -> bool:
         total_supply = sum(self.supply)
         total_demand = sum(self.demand)
         if total_supply != total_demand:
             return False  # Problem is not balanced
         return True
+    
+    def has_zero_or_negative_costs(self) -> bool:
+        for row in self.costs:
+            if any(cost <= 0 for cost in row):
+                return True # Has zeros/negatives
+        return False
+
+    def is_degenerate(self) -> bool:
+        # Check the number of allocations with m + n - 1
+        m = len(self.supply)
+        n = len(self.demand)
+        # Simple check: If there are fewer allocations than m + n - 1, degeneracy might be an issue.
+        total_allocations = sum(sum(1 for value in row if value > 0) for row in self.costs)
+        if total_allocations < m + n - 1:
+            return True # Probably degenerative
+        return False
     
 
 # Function to print the solution matrix
