@@ -134,73 +134,55 @@ def vogels_approximation_method(supply, demand, costs):
 
     return solution
 
-# Russell’s Approximation Method
 def russells_approximation_method(supply, demand, costs):
     m, n = len(supply), len(demand)
     solution = [[0] * n for _ in range(m)]  # Initialize solution matrix
 
     while any(supply) and any(demand):
-        row_penalties = []
-        col_penalties = []
+        # Step 1: Calculate ˉUi for each row
+        Ui = [max(costs[i][j] for j in range(n) if demand[j] > 0) if supply[i] > 0 else float('-inf') for i in range(m)]
 
-        # Calculate row penalties (weighted by supply)
+        # Step 2: Calculate ˉVj for each column
+        Vj = [max(costs[i][j] for i in range(m) if supply[i] > 0) if demand[j] > 0 else float('-inf') for j in range(n)]
+
+        # Step 3: Compute reduced cost Δij
+        delta = [[costs[i][j] - (Ui[i] + Vj[j]) for j in range(n)] for i in range(m)]
+
+        # Print current state
+        # print("Current Table:")
+        # print_table(costs, delta, supply, demand, Ui, Vj)
+
+        # Step 4: Find the most negative Δij
+        min_delta = float('inf')
+        min_i, min_j = -1, -1
         for i in range(m):
-            if supply[i] > 0:
-                sorted_row = sorted([(costs[i][j], j) for j in range(n) if demand[j] > 0], key=lambda x: x[0])
-                if len(sorted_row) > 1:
-                    penalty = (sorted_row[1][0] - sorted_row[0][0]) * supply[i]
-                    row_penalties.append(penalty)
-                else:
-                    row_penalties.append(float('inf'))  # No second smallest cost, assign infinity
-            else:
-                row_penalties.append(-1)
+            for j in range(n):
+                if demand[j] > 0 and supply[i] > 0 and delta[i][j] < min_delta:
+                    min_delta = delta[i][j]
+                    min_i, min_j = i, j
 
-        # Calculate column penalties (weighted by demand)
-        for j in range(n):
-            if demand[j] > 0:
-                sorted_col = sorted([(costs[i][j], i) for i in range(m) if supply[i] > 0], key=lambda x: x[0])
-                if len(sorted_col) > 1:
-                    penalty = (sorted_col[1][0] - sorted_col[0][0]) * demand[j]
-                    col_penalties.append(penalty)
-                else:
-                    col_penalties.append(float('inf'))  # No second smallest cost, assign infinity
-            else:
-                col_penalties.append(-1)
+        # Step 5: Allocate as much as possible
+        if min_i != -1 and min_j != -1:
+            allocation_amount = min(supply[min_i], demand[min_j])
+            solution[min_i][min_j] += allocation_amount
+            supply[min_i] -= allocation_amount
+            demand[min_j] -= allocation_amount
 
-        # Select the row or column with the highest penalty
-        max_row_penalty = max(row_penalties)
-        max_col_penalty = max(col_penalties)
+            # Print allocation
+            # print(f"Allocating {allocation_amount} from S{min_i + 1} to D{min_j + 1}")
 
-        if max_row_penalty >= max_col_penalty:
-            row_index = row_penalties.index(max_row_penalty)
-            col_index = min(
-                ((j, costs[row_index][j]) for j in range(n) if demand[j] > 0),
-                key=lambda x: x[1], default=(None, None)
-            )[0]
-        else:
-            col_index = col_penalties.index(max_col_penalty)
-            row_index = min(
-                ((i, costs[i][col_index]) for i in range(m) if supply[i] > 0),
-                key=lambda x: x[1], default=(None, None)
-            )[0]
+            # Mark rows/columns exhausted
+            if supply[min_i] == 0:
+                for j in range(n):
+                    delta[min_i][j] = float('inf')  # Mark row as eliminated
+            if demand[min_j] == 0:
+                for i in range(m):
+                    delta[i][min_j] = float('inf')  # Mark column as eliminated
 
-        # Allocate as much as possible to the selected cell
-        allocation = min(supply[row_index], demand[col_index])
-        solution[row_index][col_index] = allocation
-
-        # Update supply and demand
-        supply[row_index] -= allocation
-        demand[col_index] -= allocation
-
-        # If supply is exhausted, remove this row
-        if supply[row_index] == 0:
-            row_penalties[row_index] = -1  # Ignore this row in the next iterations
-
-        # If demand is satisfied, remove this column
-        if demand[col_index] == 0:
-            col_penalties[col_index] = -1  # Ignore this column in the next iterations
+            print(solution)
 
     return solution
+
 
 # Function to print the solution matrix
 def print_solution(solution):
