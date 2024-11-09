@@ -13,10 +13,10 @@ In case of problem invalidity returns:
 - ”The problem is not balanced!” - If problem is unbalanced
 
 # Example of inputs
-Program ask for Supply, Demand and Costs.
+Program asks for Supply, Demand and Costs.
 Example of inserting this problem:
 
-[example table](https://i.imgur.com/e8LnLRo.png)
+![example table](https://i.imgur.com/e8LnLRo.png)
 ```inputs
 Enter the supply values (space-separated): 7 9 18
 Enter the demand values (space-separated): 5 8 7 14
