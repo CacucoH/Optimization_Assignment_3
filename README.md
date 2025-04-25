@@ -1,3 +1,7 @@
+# WARNING! This repo is archived because updates are no longer needed. 
+[!IMPORTANT]
+> This code might be usefult for those who are searching for code vesion of *North-West*, *Vogel’s* and *Russell’s* approximation methods
+
 # Assignment 3
 Write a computer program in any programming language (e.g. Python, C++) to find initial
 basic feasible solution for given transportation problem by using
