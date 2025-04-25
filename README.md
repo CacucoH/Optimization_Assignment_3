@@ -1,4 +1,4 @@
-# ⚠️ WARNING! This repo is archived because updates are no longer needed. 
+# ⚠️ WARNING! This repo is archived, since updates are no longer needed. 
 > [!IMPORTANT]
 > This code might be usefult for those who are searching for code vesion of *North-West*, *Vogel’s* and *Russell’s* approximation methods
 
